@@ -28,6 +28,113 @@
         }
       }
     },
+    "/v1/models": {
+      "get": {
+        "summary": "Models",
+        "description": "Identify the loaded encoder and trained-head model.",
+        "operationId": "models_v1_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "items": {
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "type": "object",
+                  "title": "Response Models V1 Models Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/systemone": {
+      "post": {
+        "summary": "Systemone",
+        "description": "Answer caller-defined choice, noul and score questions.",
+        "operationId": "systemone_v1_systemone_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rank": {
+      "post": {
+        "summary": "Rank",
+        "description": "Rank arbitrary candidate answers using the trained CLM heads.",
+        "operationId": "rank_v1_rank_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RankRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/embeddings": {
       "post": {
         "summary": "Embed",
@@ -70,6 +177,215 @@
   },
   "components": {
     "schemas": {
+      "Choice": {
+        "properties": {
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Instructions"
+          },
+          "type": {
+            "type": "string",
+            "const": "choice",
+            "title": "Type"
+          },
+          "criteria": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Criteria"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instructions",
+          "type",
+          "criteria"
+        ],
+        "title": "Choice",
+        "description": "Select a label from caller-supplied descriptions."
+      },
+      "ChoiceAnswer": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "choice",
+            "title": "Type",
+            "default": "choice"
+          },
+          "choice": {
+            "type": "string",
+            "title": "Choice"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Probabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "choice",
+          "confidence",
+          "probabilities"
+        ],
+        "title": "ChoiceAnswer",
+        "description": "Winning label and distribution over all supplied labels."
+      },
+      "DecisionRequest": {
+        "properties": {
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/JsonValue"
+                },
+                "type": "object"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JsonValue"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "State"
+          },
+          "questions": {
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Choice"
+                },
+                {
+                  "$ref": "#/components/schemas/Noul"
+                },
+                {
+                  "$ref": "#/components/schemas/Score"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "choice": "#/components/schemas/Choice",
+                  "noul": "#/components/schemas/Noul",
+                  "score": "#/components/schemas/Score"
+                }
+              }
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Questions"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "temperature": {
+            "type": "number",
+            "maximum": 100.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Temperature",
+            "default": 1.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "questions"
+        ],
+        "title": "DecisionRequest",
+        "description": "Ask one or more typed questions about a state."
+      },
+      "DecisionResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "answers": {
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ChoiceAnswer"
+                },
+                {
+                  "$ref": "#/components/schemas/NoulAnswer"
+                },
+                {
+                  "$ref": "#/components/schemas/ScoreAnswer"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "choice": "#/components/schemas/ChoiceAnswer",
+                  "noul": "#/components/schemas/NoulAnswer",
+                  "score": "#/components/schemas/ScoreAnswer"
+                }
+              }
+            },
+            "type": "object",
+            "title": "Answers"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/DecisionUsage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "answers",
+          "usage"
+        ],
+        "title": "DecisionResponse",
+        "description": "Typed answers keyed by the caller's question identifiers."
+      },
+      "DecisionUsage": {
+        "properties": {
+          "billing_units": {
+            "type": "integer",
+            "title": "Billing Units"
+          },
+          "input_tokens": {
+            "type": "integer",
+            "title": "Input Tokens"
+          },
+          "output_tokens": {
+            "type": "integer",
+            "const": 0,
+            "title": "Output Tokens",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "billing_units",
+          "input_tokens"
+        ],
+        "title": "DecisionUsage",
+        "description": "Questions answered and encoder tokens used after truncation."
+      },
       "Embedding": {
         "properties": {
           "object": {
@@ -83,10 +399,17 @@
             "title": "Index"
           },
           "embedding": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array",
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
             "title": "Embedding"
           }
         },
@@ -127,7 +450,10 @@
           },
           "encoding_format": {
             "type": "string",
-            "const": "float",
+            "enum": [
+              "float",
+              "base64"
+            ],
             "title": "Encoding Format",
             "default": "float"
           },
@@ -195,6 +521,246 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "JsonValue": {},
+      "Noul": {
+        "properties": {
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Instructions"
+          },
+          "type": {
+            "type": "string",
+            "const": "noul",
+            "title": "Type"
+          },
+          "criteria": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/JsonValue"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criteria"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instructions",
+          "type"
+        ],
+        "title": "Noul",
+        "description": "Estimate the probability that a caller-supplied statement is true."
+      },
+      "NoulAnswer": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "noul",
+            "title": "Type",
+            "default": "noul"
+          },
+          "noul": {
+            "type": "number",
+            "title": "Noul"
+          }
+        },
+        "type": "object",
+        "required": [
+          "noul"
+        ],
+        "title": "NoulAnswer",
+        "description": "Probability the statement is true; false has probability 1 - noul."
+      },
+      "RankRequest": {
+        "properties": {
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/JsonValue"
+                },
+                "type": "object"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JsonValue"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Context"
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Question"
+          },
+          "answers": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Answers"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "temperature": {
+            "type": "number",
+            "maximum": 100.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Temperature",
+            "default": 1.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "context",
+          "question",
+          "answers"
+        ],
+        "title": "RankRequest",
+        "description": "Rank caller-supplied answers against a context and question."
+      },
+      "RankResponse": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "ranked": {
+            "items": {
+              "$ref": "#/components/schemas/RankedCandidate"
+            },
+            "type": "array",
+            "title": "Ranked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "ranked"
+        ],
+        "title": "RankResponse",
+        "description": "Ranked candidates from the same CLM scoring primitive."
+      },
+      "RankedCandidate": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "candidate": {
+            "type": "string",
+            "title": "Candidate"
+          },
+          "prob": {
+            "type": "number",
+            "title": "Prob"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "candidate",
+          "prob"
+        ],
+        "title": "RankedCandidate",
+        "description": "One candidate and its probability, ordered by descending probability."
+      },
+      "Score": {
+        "properties": {
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Instructions"
+          },
+          "type": {
+            "type": "string",
+            "const": "score",
+            "title": "Type"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "array",
+            "minItems": 2,
+            "title": "Criteria"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instructions",
+          "type",
+          "criteria"
+        ],
+        "title": "Score",
+        "description": "Score a state against an ordered rubric supplied by the caller."
+      },
+      "ScoreAnswer": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "score",
+            "title": "Type",
+            "default": "score"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "legend": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Legend"
+          },
+          "probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Probabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "confidence",
+          "legend",
+          "probabilities"
+        ],
+        "title": "ScoreAnswer",
+        "description": "Expected rubric index and distribution over the ordered levels."
       },
       "Usage": {
         "properties": {

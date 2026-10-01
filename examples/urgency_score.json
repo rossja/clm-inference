@@ -1,0 +1,15 @@
+{
+  "state": "Our production checkout has been completely unavailable for 45 minutes. Every customer purchase is failing, we have no workaround, and revenue is being lost each minute.",
+  "questions": {
+    "urgency": {
+      "type": "score",
+      "instructions": "Assess the urgency of this support case using the ordered impact levels.",
+      "criteria": [
+        "Low: a cosmetic issue or general question with no interruption to business.",
+        "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+        "High: a major business function is impaired for some users with no practical workaround.",
+        "Critical: a production service is unavailable for all users and business activity is stopped."
+      ]
+    }
+  }
+}

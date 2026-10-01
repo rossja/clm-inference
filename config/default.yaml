@@ -1,4 +1,6 @@
 model: czl/CLM-v0.1-8B-MLX-8bit
+heads_config: heads/config.json
+heads_weights: heads/CLM_v0.1-8B.safetensors
 host: 127.0.0.1
 port: 8092
 max_tokens: 2048

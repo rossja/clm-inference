@@ -1,0 +1,15 @@
+{
+  "state": "Someone changed our administrator email without authorization. We can no longer sign in, and an unfamiliar API token is exporting customer records.",
+  "questions": {
+    "escalation_path": {
+      "type": "choice",
+      "instructions": "Which escalation team should handle this customer support case? Choose the team responsible for the primary problem.",
+      "criteria": {
+        "billing": "Billing specialists handle charges, refunds, invoices and subscription payment disputes.",
+        "technical": "Technical support engineers handle product defects, service outages and integration failures.",
+        "account_access": "Account support handles routine password resets, account recovery and user permission changes without signs of compromise.",
+        "security": "The security incident team handles suspected account compromise, unauthorized access and customer data exposure."
+      }
+    }
+  }
+}

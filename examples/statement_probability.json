@@ -1,0 +1,13 @@
+{
+  "state": "The customer says the issue is resolved, thanks the team for the fix, and asks us to close the support case.",
+  "questions": {
+    "follow_up_needed": {
+      "type": "noul",
+      "instructions": "The customer needs further troubleshooting before this support case can be closed.",
+      "criteria": {
+        "true": "The customer still has an unresolved problem and needs further troubleshooting.",
+        "false": "The customer confirms the problem is resolved and requests that the case be closed."
+      }
+    }
+  }
+}

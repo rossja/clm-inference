@@ -1,10 +1,12 @@
-"""Serve CLM embeddings through a small OpenAI-compatible HTTP API."""
+"""Serve CLM zero-shot decisions, ranking and embeddings on Apple Silicon."""
 
 import argparse
 import asyncio
+import base64
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from pathlib import Path
+import struct
 from typing import Literal
 
 from dotenv import load_dotenv
@@ -13,11 +15,17 @@ from pydantic import BaseModel, Field
 import uvicorn
 import yaml
 
+from clm_inference.schema import (
+    DecisionRequest, DecisionResponse, RankRequest, RankResponse, candidates,
+)
+
 
 class Settings(BaseModel):
     """Server settings supplied by a YAML configuration file."""
 
     model: str = Field(min_length=1)
+    heads_config: str = Field(min_length=1)
+    heads_weights: str = Field(min_length=1)
     host: str = Field(min_length=1)
     port: int = Field(ge=1, le=65535)
     max_tokens: int = Field(ge=1, le=2048)
@@ -29,7 +37,7 @@ class EmbeddingRequest(BaseModel):
 
     input: str | list[str]
     model: str | None = None
-    encoding_format: Literal["float"] = "float"
+    encoding_format: Literal["float", "base64"] = "float"
     truncate_prompt_tokens: int | None = Field(default=None, ge=1)
 
 
@@ -38,7 +46,7 @@ class Embedding(BaseModel):
 
     object: Literal["embedding"] = "embedding"
     index: int
-    embedding: list[float]
+    embedding: list[float] | str
 
 
 class Usage(BaseModel):
@@ -57,20 +65,28 @@ class EmbeddingResponse(BaseModel):
     usage: Usage
 
 
-def load_encoder(model: str):
-    """Download into the standard Hub cache and load on the inference thread."""
+def load_engine(settings: Settings):
+    """Load the encoder and heads from the standard Hub cache on one thread."""
     # Read .env before Hub caches its environment settings; import MLX here
     # so OpenAPI generation does not need Metal.
     from huggingface_hub import snapshot_download  # pylint: disable=import-outside-toplevel
     from clm_inference.encoder import Encoder  # pylint: disable=import-outside-toplevel
+    from clm_inference.engine import Engine  # pylint: disable=import-outside-toplevel
+    from clm_inference.heads import HeadPair  # pylint: disable=import-outside-toplevel
 
     path = snapshot_download(
-        model,
+        settings.model,
         allow_patterns=[
-            "*.json", "model*.safetensors", "tokenizer.model", "*.tiktoken"
+            "*.json", "model*.safetensors", "tokenizer.model", "*.tiktoken",
+            settings.heads_config, settings.heads_weights,
         ],
     )
-    return Encoder(Path(path))
+    path = Path(path)
+    return Engine(
+        Encoder(path),
+        HeadPair(path / settings.heads_config, path / settings.heads_weights),
+        settings.model, settings.max_tokens,
+    )
 
 
 def create_app(settings: Settings) -> FastAPI:
@@ -81,8 +97,8 @@ def create_app(settings: Settings) -> FastAPI:
         loop = asyncio.get_running_loop()
         with ThreadPoolExecutor(max_workers=1) as executor:
             app.state.executor = executor
-            app.state.encoder = await loop.run_in_executor(
-                executor, load_encoder, settings.model
+            app.state.engine = await loop.run_in_executor(
+                executor, load_engine, settings
             )
             yield
 
@@ -95,11 +111,45 @@ def create_app(settings: Settings) -> FastAPI:
         """Report readiness after the model has loaded."""
         return {"status": "ok", "model": settings.model}
 
+    def validate_model(model: str | None) -> None:
+        if model is not None and model != settings.model:
+            raise HTTPException(400, "The requested model is not loaded.")
+
+    @app.get("/v1/models")
+    async def models() -> dict[str, list[dict[str, str]]]:
+        """Identify the loaded encoder and trained-head model."""
+        return {"models": [{"name": settings.model}]}
+
+    @app.post("/v1/systemone")
+    async def systemone(request: DecisionRequest) -> DecisionResponse:
+        """Answer caller-defined choice, noul and score questions."""
+        validate_model(request.model)
+        text_count = sum(
+            1 + len(candidates(question)[0])
+            for question in request.questions.values()
+        )
+        if text_count > settings.max_batch_size:
+            raise HTTPException(
+                400, "Questions and options exceed batch limit."
+            )
+        return await asyncio.get_running_loop().run_in_executor(
+            app.state.executor, app.state.engine.answer, request
+        )
+
+    @app.post("/v1/rank")
+    async def rank(request: RankRequest) -> RankResponse:
+        """Rank arbitrary candidate answers using the trained CLM heads."""
+        validate_model(request.model)
+        if 1 + len(request.answers) > settings.max_batch_size:
+            raise HTTPException(400, "Context and answers exceed batch limit.")
+        return await asyncio.get_running_loop().run_in_executor(
+            app.state.executor, app.state.engine.rank, request
+        )
+
     @app.post("/v1/embeddings")
     async def embed(request: EmbeddingRequest) -> EmbeddingResponse:
         """Return one normalized 4096-dimensional vector per input text."""
-        if request.model is not None and request.model != settings.model:
-            raise HTTPException(400, "The requested model is not loaded.")
+        validate_model(request.model)
         texts = (
             [request.input] if isinstance(request.input, str) else request.input
         )
@@ -113,8 +163,16 @@ def create_app(settings: Settings) -> FastAPI:
                 400, "truncate_prompt_tokens exceeds max_tokens."
             )
         vectors, tokens = await asyncio.get_running_loop().run_in_executor(
-            app.state.executor, app.state.encoder.embed, texts, max_tokens
+            app.state.executor, app.state.engine.encoder.embed,
+            texts, max_tokens,
         )
+        if request.encoding_format == "base64":
+            vectors = [
+                base64.b64encode(
+                    struct.pack(f"<{len(vector)}f", *vector)
+                ).decode("ascii")
+                for vector in vectors
+            ]
         return EmbeddingResponse(
             data=[
                 Embedding(index=index, embedding=vector)

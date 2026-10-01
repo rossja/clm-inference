@@ -1,0 +1,18 @@
+{
+  "state": {
+    "from": "IT Security <helpdesk@company-login-check.example>",
+    "subject": "Immediate action: your account will be suspended",
+    "body": "Your mailbox will be disabled in 30 minutes. Visit https://company-login-check.example/verify and enter your company password and MFA recovery codes to keep access. Do not contact the help desk."
+  },
+  "questions": {
+    "message_class": {
+      "type": "choice",
+      "instructions": "Classify this email. If it attempts credential theft, impersonation or malicious redirection, choose phishing rather than spam.",
+      "criteria": {
+        "spam": "Unsolicited bulk advertising or unwanted promotional email without a credential theft or impersonation attempt.",
+        "phishing": "Deceptive email impersonating a trusted party to steal passwords, recovery codes, money or sensitive information, or lure the recipient to a malicious site.",
+        "benign": "Legitimate routine correspondence with no deceptive request, credential theft attempt or unsolicited bulk promotion."
+      }
+    }
+  }
+}

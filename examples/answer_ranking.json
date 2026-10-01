@@ -1,0 +1,9 @@
+{
+  "context": "A student asks about the physical cause of ocean tides on Earth.",
+  "question": "What causes tides on Earth?",
+  "answers": [
+    "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+    "Photosynthesis in marine plants.",
+    "The Earth's round shape alone, without any external gravitational influence."
+  ]
+}

@@ -1,7 +1,7 @@
 [project]
 name = "clm-inference"
 version = "0.1.0"
-description = "An MLX embedding server for contrastive language models on Apple Silicon."
+description = "Zero-shot CLM decisions, ranking and embeddings on Apple Silicon."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
