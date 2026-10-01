@@ -4,11 +4,11 @@ Architecture follows upstream CLM, with PyTorch-compatible exact GELU:
 https://github.com/Contrastive-LM/CLM/blob/main/src/clm/heads.py
 """
 
-import json
 from pathlib import Path
 
 import mlx.core as mx
 import mlx.nn as nn
+import torch
 
 
 class Head(nn.Module):
@@ -40,15 +40,27 @@ class Head(nn.Module):
 
 
 class HeadPair(nn.Module):
-    """Load both heads strictly from safetensors, with no PyTorch dependency."""
+    """Read the official PyTorch checkpoint and evaluate both heads in MLX."""
 
-    def __init__(self, config_path: Path, weights_path: Path):
+    def __init__(self, weights_path: Path):
         super().__init__()
-        config = json.loads(config_path.read_text(encoding="utf-8"))
-        self.state_head = Head(config["state_head"])
-        self.action_head = Head(config["action_head"])
-        self.logit_scale = mx.array(config["logit_scale"], dtype=mx.float32)
-        self.load_weights(str(weights_path), strict=True)
+        checkpoint = torch.load(
+            weights_path, map_location="cpu", weights_only=True
+        )
+        config = checkpoint["cfg"]
+        self.encoder_model = config["model"]
+        self.state_head = Head(config)
+        self.action_head = Head(config)
+        self.logit_scale = mx.array(0, dtype=mx.float32)
+        weights = [
+            (f"{prefix}.{name}", mx.array(value.numpy()))
+            for prefix in ("state_head", "action_head")
+            for name, value in checkpoint[prefix].items()
+        ]
+        weights.append(("logit_scale", mx.array(
+            checkpoint["logit_scale"].numpy()
+        )))
+        self.load_weights(weights, strict=True)
         mx.eval(self.parameters())
         self.scale = min(float(mx.exp(self.logit_scale).item()), 100.0)
 

@@ -1,7 +1,8 @@
-model: czl/CLM-v0.1-8B-MLX-8bit
-heads_config: heads/config.json
-heads_weights: heads/CLM_v0.1-8B.safetensors
+model: Contrastive-LM/CLM-v0.1-8B
+encoder_model: Qwen/Qwen3-8B
+heads_weights: CLM_v0.1-8B.pt
 host: 127.0.0.1
 port: 8092
 max_tokens: 2048
 max_batch_size: 32
+gpu_memory_utilization: 0.5

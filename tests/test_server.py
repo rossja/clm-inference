@@ -30,6 +30,10 @@ def client(monkeypatch):
             calls.append((texts, max_tokens))
             return [[float(index)] for index in range(len(texts))], len(texts)
 
+        def close(self):
+            assert threading.get_ident() == calls[0]
+            calls.append("closed")
+
     def answer(request):
         assert threading.get_ident() == calls[0]
         calls.append(request)
@@ -59,11 +63,12 @@ def client(monkeypatch):
     monkeypatch.setattr(server, "load_engine", load_engine)
     settings = server.Settings(
         model="test-model", host="127.0.0.1", port=8092,
-        heads_config="heads/config.json", heads_weights="heads/test.safetensors",
-        max_tokens=10, max_batch_size=5,
+        encoder_model="test-encoder", heads_weights="test.pt",
+        max_tokens=10, max_batch_size=5, gpu_memory_utilization=0.5,
     )
     with TestClient(server.create_app(settings)) as test_client:
         yield test_client, calls
+    assert calls[-1] == "closed"
 
 
 def test_embeddings_preserve_order_and_usage(client):
@@ -73,7 +78,7 @@ def test_embeddings_preserve_order_and_usage(client):
     })
     assert response.status_code == 200
     body = response.json()
-    assert body["model"] == "test-model"
+    assert body["model"] == "test-encoder"
     assert body["data"] == [
         {"object": "embedding", "index": 0, "embedding": [0.0]},
         {"object": "embedding", "index": 1, "embedding": [1.0]},
@@ -113,8 +118,9 @@ def test_dotenv_overrides_environment(tmp_path, monkeypatch):
     config = tmp_path / "config.yaml"
     config.write_text(
         "model: test-model\nhost: 127.0.0.1\nport: 8092\n"
-        "heads_config: heads/config.json\nheads_weights: heads/test.safetensors\n"
-        "max_tokens: 10\nmax_batch_size: 2\n", encoding="utf-8",
+        "encoder_model: test-encoder\nheads_weights: test.pt\n"
+        "max_tokens: 10\nmax_batch_size: 2\n"
+        "gpu_memory_utilization: 0.5\n", encoding="utf-8",
     )
     assert server.read_settings(config).model == "test-model"
     assert os.environ["HF_HOME"] == "file-cache"
@@ -131,6 +137,20 @@ def test_base64_embeddings_for_upstream_clients(client):
         for item in response.json()["data"]
     ]
     assert decoded == [0.0, 1.0]
+
+
+def test_encoder_and_decision_model_identifiers_are_distinct(client):
+    test_client, _ = client
+    assert test_client.post("/v1/embeddings", json={
+        "input": "one", "model": "test-encoder",
+    }).status_code == 200
+    assert test_client.post("/v1/embeddings", json={
+        "input": "one", "model": "test-model",
+    }).status_code == 400
+    assert test_client.post("/v1/rank", json={
+        "context": "one", "question": "Pick", "answers": ["a"],
+        "model": "test-encoder",
+    }).status_code == 400
 
 
 def test_openapi_schema_is_current():
@@ -158,7 +178,7 @@ def test_decision_and_rank_endpoints(client):
     assert ranked.json()["ranked"][0]["candidate"] == "first"
     assert len(calls) == 3
     assert test_client.get("/v1/models").json() == {
-        "models": [{"name": "test-model"}],
+        "models": [{"name": "test-model"}, {"name": "test-encoder"}],
     }
 
 

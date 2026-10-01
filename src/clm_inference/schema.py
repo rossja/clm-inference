@@ -56,7 +56,9 @@ class DecisionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     state: State
     questions: dict[str, Question] = Field(min_length=1)
-    model: str | None = None
+    model: str | None = Field(
+        default=None, description="Optional CLM decision model ID."
+    )
     temperature: float = Field(default=1.0, gt=0, le=100, allow_inf_nan=False)
 
 
@@ -67,7 +69,9 @@ class RankRequest(BaseModel):
     context: State
     question: str = Field(min_length=1)
     answers: list[Annotated[str, Field(min_length=1)]] = Field(min_length=1)
-    model: str | None = None
+    model: str | None = Field(
+        default=None, description="Optional CLM decision model ID."
+    )
     temperature: float = Field(default=1.0, gt=0, le=100, allow_inf_nan=False)
 
 

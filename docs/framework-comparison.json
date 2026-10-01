@@ -1,0 +1,1091 @@
+{
+  "runtime": {
+    "date": "2026-09-30",
+    "hardware": "Apple M3 Max",
+    "unified_memory_bytes": 51539607552,
+    "os": "macOS 27.0.1",
+    "python": "3.12.14",
+    "encoder": "Qwen/Qwen3-8B",
+    "encoder_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "encoder_dtype": "bfloat16",
+    "heads_revision": "e939398d4556fcd9400c76fa8c5a513202f42b0a",
+    "vllm_mlx_commit": "f5d7e00a5c23d7dd478bc07af03cc53fea75e6be",
+    "vllm_metal_release": "0.30.0",
+    "max_tokens": 2048,
+    "max_batch_size": 32,
+    "head_implementation": "Same local MLX heads for every backend",
+    "timing": "Inference API in process; loading and first requests excluded from medians; one backend at a time; prefix caching disabled; not HTTP latency",
+    "example_sha256": {
+      "answer_ranking.json": "7a63bd4c029ce380206b0f32019dd287b8464e75e1145430423ec6ac3f496f9f",
+      "email_classification.json": "6371751f019b4da938d8b95e45dd31371ecd22b8434b9346060c371b4414a61a",
+      "prompt_injection.json": "e6297e0bd42345f740f1876e1187553f6b4463caa35809055ce85b597206df0f",
+      "statement_probability.json": "94b7253c8e86fc2969107e1cad052d06414797aebcdf8d6349ed3f24933bc056",
+      "support_routing.json": "150953baa9a83d6e8e0b07d53db623fc946d450c44d19383cc86a1dcbf6afd4b",
+      "urgency_score.json": "28b66a6811c9e419116ba7912eecfac53e17aceb8a9ec9bebaacd1b61b91dd54"
+    }
+  },
+  "runs": {
+    "direct": {
+      "backend": "mlx-lm",
+      "versions": {
+        "mlx": "0.32.3",
+        "mlx-lm": "0.31.3",
+        "torch": "2.14.1",
+        "transformers": "5.18.0"
+      },
+      "load_seconds": 2.627151208000214,
+      "max_rss_bytes": 15832137728,
+      "mlx_peak_bytes": 15336028468,
+      "results": {
+        "answer_ranking": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "ranked": [
+              {
+                "rank": 1,
+                "candidate": "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+                "prob": 0.9999826113601095
+              },
+              {
+                "rank": 2,
+                "candidate": "The Earth's round shape alone, without any external gravitational influence.",
+                "prob": 1.7388462122665987e-05
+              },
+              {
+                "rank": 3,
+                "candidate": "Photosynthesis in marine plants.",
+                "prob": 1.7776784248782664e-10
+              }
+            ]
+          },
+          "first_request_seconds": 0.5830280840000341
+        },
+        "email_classification": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "message_class": {
+                "type": "choice",
+                "choice": "spam",
+                "confidence": 0.6711400811663931,
+                "probabilities": {
+                  "spam": 0.7807600541109287,
+                  "phishing": 0.12654984941250502,
+                  "benign": 0.09269009647656619
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 155,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3985775829987688
+        },
+        "prompt_injection": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "input_class": {
+                "type": "choice",
+                "choice": "benign",
+                "confidence": 0.9796061616005904,
+                "probabilities": {
+                  "malicious": 0.010196919199704791,
+                  "benign": 0.9898030808002952
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 140,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3192756669996015
+        },
+        "statement_probability": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "follow_up_needed": {
+                "type": "noul",
+                "noul": 0.9870797215629662
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 68,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.22351554200031387
+        },
+        "support_routing": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "escalation_path": {
+                "type": "choice",
+                "choice": "security",
+                "confidence": 0.9136721648034049,
+                "probabilities": {
+                  "billing": 0.0020409142248321893,
+                  "technical": 0.02634217974276728,
+                  "account_access": 0.03636278242984689,
+                  "security": 0.9352541236025537
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 105,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.35048912499951257
+        },
+        "urgency_score": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "urgency": {
+                "type": "score",
+                "score": 2.426289631293088,
+                "confidence": 0.40848378384217643,
+                "legend": {
+                  "0": "Low: a cosmetic issue or general question with no interruption to business.",
+                  "1": "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+                  "2": "High: a major business function is impaired for some users with no practical workaround.",
+                  "3": "Critical: a production service is unavailable for all users and business activity is stopped."
+                },
+                "probabilities": {
+                  "0": 0.06496502861523704,
+                  "1": 0.00014314935807001775,
+                  "2": 0.37852898414506064,
+                  "3": 0.5563628378816323
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 107,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3418781670006865
+        }
+      },
+      "request_seconds": {
+        "answer_ranking": [
+          0.24357741600033478,
+          0.24445912500050326,
+          0.24023200000010547
+        ],
+        "email_classification": [
+          0.40905908400054614,
+          0.40452649999861023,
+          0.398441332999937
+        ],
+        "prompt_injection": [
+          0.3222685000000638,
+          0.3227166249998845,
+          0.3181268339994858
+        ],
+        "statement_probability": [
+          0.2269499159992847,
+          0.22372104200076137,
+          0.22215720799977134
+        ],
+        "support_routing": [
+          0.3476059589993383,
+          0.3499192500003119,
+          0.3429324999997334
+        ],
+        "urgency_score": [
+          0.3411228749992006,
+          0.33718045900059224,
+          0.33402483300051244
+        ]
+      },
+      "median_request_seconds": 0.3283707290001985,
+      "batch_encoder_seconds": [
+        1.861830125000779,
+        1.868389125000249,
+        1.8821802500006015
+      ],
+      "batch_text_count": 24,
+      "batch_tokens": 631,
+      "mixed_length_singleton_max_abs_difference": 0.0,
+      "probe_texts": [
+        "A student asks about the physical cause of ocean tides on Earth.\n\nWhat causes tides on Earth?",
+        "Critical: a production service is unavailable for all users and business activity is stopped.",
+        "hello",
+        "A longer sentence to exercise padding."
+      ],
+      "probe_cosine_min_vs_serial_mlx": 1.0,
+      "probe_vector_norm_min": 0.9999999400829682,
+      "probe_vector_norm_max": 1.0000000270794027,
+      "median_batch_seconds": 1.868389125000249
+    },
+    "batched": {
+      "backend": "mlx-lm-batched",
+      "versions": {
+        "mlx": "0.32.3",
+        "mlx-lm": "0.31.3",
+        "torch": "2.14.1",
+        "transformers": "5.18.0"
+      },
+      "load_seconds": 4.558681249998699,
+      "max_rss_bytes": 15832481792,
+      "mlx_peak_bytes": 15794534804,
+      "results": {
+        "answer_ranking": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "ranked": [
+              {
+                "rank": 1,
+                "candidate": "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+                "prob": 0.9999839695531123
+              },
+              {
+                "rank": 2,
+                "candidate": "The Earth's round shape alone, without any external gravitational influence.",
+                "prob": 1.6030271482650875e-05
+              },
+              {
+                "rank": 3,
+                "candidate": "Photosynthesis in marine plants.",
+                "prob": 1.7540504520691126e-10
+              }
+            ]
+          },
+          "first_request_seconds": 0.3561173329999292
+        },
+        "email_classification": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "message_class": {
+                "type": "choice",
+                "choice": "spam",
+                "confidence": 0.661980678943076,
+                "probabilities": {
+                  "spam": 0.7746537859620507,
+                  "phishing": 0.13284271717556134,
+                  "benign": 0.09250349686238801
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 155,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3295389590002742
+        },
+        "prompt_injection": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "input_class": {
+                "type": "choice",
+                "choice": "benign",
+                "confidence": 0.9804202331700345,
+                "probabilities": {
+                  "malicious": 0.009789883414982693,
+                  "benign": 0.9902101165850172
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 140,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.2678427920000104
+        },
+        "statement_probability": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "follow_up_needed": {
+                "type": "noul",
+                "noul": 0.9883960334882708
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 68,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.19510608299970045
+        },
+        "support_routing": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "escalation_path": {
+                "type": "choice",
+                "choice": "security",
+                "confidence": 0.914783233025786,
+                "probabilities": {
+                  "billing": 0.0019218121168145927,
+                  "technical": 0.025389522545413826,
+                  "account_access": 0.036601240568432086,
+                  "security": 0.9360874247693395
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 105,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.2668410420010332
+        },
+        "urgency_score": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "urgency": {
+                "type": "score",
+                "score": 2.430391900361295,
+                "confidence": 0.4098944796861691,
+                "legend": {
+                  "0": "Low: a cosmetic issue or general question with no interruption to business.",
+                  "1": "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+                  "2": "High: a major business function is impaired for some users with no practical workaround.",
+                  "3": "Critical: a production service is unavailable for all users and business activity is stopped."
+                },
+                "probabilities": {
+                  "0": 0.06343398554431605,
+                  "1": 0.00016098831469996862,
+                  "2": 0.3789841663763572,
+                  "3": 0.5574208597646269
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 107,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.20371041599901218
+        }
+      },
+      "request_seconds": {
+        "answer_ranking": [
+          0.18679779099875304,
+          0.1879709160002676,
+          0.18508570800076996
+        ],
+        "email_classification": [
+          0.3309566250009084,
+          0.3300880419992609,
+          0.3312072500011709
+        ],
+        "prompt_injection": [
+          0.2658764589996281,
+          0.2671012909995625,
+          0.2662104580012965
+        ],
+        "statement_probability": [
+          0.1960209169992595,
+          0.19566262499938603,
+          0.19624937499975204
+        ],
+        "support_routing": [
+          0.2663425829996413,
+          0.26733133400011866,
+          0.26787474999946426
+        ],
+        "urgency_score": [
+          0.20324116699885053,
+          0.20438649999960035,
+          0.20337712500077032
+        ]
+      },
+      "median_request_seconds": 0.23513147949961422,
+      "batch_encoder_seconds": [
+        2.8264297080004326,
+        2.8387617919997865,
+        2.84035083299932
+      ],
+      "batch_text_count": 24,
+      "batch_tokens": 631,
+      "mixed_length_singleton_max_abs_difference": 0.00473177433013916,
+      "probe_texts": [
+        "A student asks about the physical cause of ocean tides on Earth.\n\nWhat causes tides on Earth?",
+        "Critical: a production service is unavailable for all users and business activity is stopped.",
+        "hello",
+        "A longer sentence to exercise padding."
+      ],
+      "probe_cosine_min_vs_serial_mlx": 0.9999680195424782,
+      "probe_vector_norm_min": 0.9999998820376735,
+      "probe_vector_norm_max": 1.0000000159977798,
+      "median_batch_seconds": 2.8387617919997865
+    },
+    "mlx": {
+      "backend": "vllm-mlx",
+      "versions": {
+        "mlx": "0.32.3",
+        "mlx-lm": "0.31.3",
+        "mlx-embeddings": "0.1.0",
+        "vllm-mlx": "0.5.0",
+        "torch": "2.14.1",
+        "transformers": "5.18.0"
+      },
+      "load_seconds": 12.078521457999159,
+      "max_rss_bytes": 15953985536,
+      "mlx_peak_bytes": 15868935482,
+      "results": {
+        "answer_ranking": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "ranked": [
+              {
+                "rank": 1,
+                "candidate": "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+                "prob": 0.999983869599771
+              },
+              {
+                "rank": 2,
+                "candidate": "The Earth's round shape alone, without any external gravitational influence.",
+                "prob": 1.6130225168164143e-05
+              },
+              {
+                "rank": 3,
+                "candidate": "Photosynthesis in marine plants.",
+                "prob": 1.75060770647475e-10
+              }
+            ]
+          },
+          "first_request_seconds": 0.9310536659995705
+        },
+        "email_classification": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "message_class": {
+                "type": "choice",
+                "choice": "spam",
+                "confidence": 0.6554762151147859,
+                "probabilities": {
+                  "spam": 0.7703174767431906,
+                  "phishing": 0.13602202708099176,
+                  "benign": 0.09366049617581765
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 155,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3165192910000769
+        },
+        "prompt_injection": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "input_class": {
+                "type": "choice",
+                "choice": "benign",
+                "confidence": 0.9800152441078098,
+                "probabilities": {
+                  "malicious": 0.009992377946095013,
+                  "benign": 0.9900076220539049
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 140,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.25400183300007484
+        },
+        "statement_probability": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "follow_up_needed": {
+                "type": "noul",
+                "noul": 0.9884246997253774
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 68,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.18505924999954004
+        },
+        "support_routing": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "escalation_path": {
+                "type": "choice",
+                "choice": "security",
+                "confidence": 0.9163699094218631,
+                "probabilities": {
+                  "billing": 0.001895532036198772,
+                  "technical": 0.025599886961876088,
+                  "account_access": 0.03522714893552786,
+                  "security": 0.9372774320663974
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 105,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.25551637499847857
+        },
+        "urgency_score": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "urgency": {
+                "type": "score",
+                "score": 2.4309844643578646,
+                "confidence": 0.4120786266736357,
+                "legend": {
+                  "0": "Low: a cosmetic issue or general question with no interruption to business.",
+                  "1": "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+                  "2": "High: a major business function is impaired for some users with no practical workaround.",
+                  "3": "Critical: a production service is unavailable for all users and business activity is stopped."
+                },
+                "probabilities": {
+                  "0": 0.06395705374969517,
+                  "1": 0.00016039814797176653,
+                  "2": 0.3768235780971063,
+                  "3": 0.5590589700052268
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 107,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.23767066700020223
+        }
+      },
+      "request_seconds": {
+        "answer_ranking": [
+          0.18395425000016985,
+          0.18013033300121606,
+          0.17849383300017507
+        ],
+        "email_classification": [
+          0.3190405830009695,
+          0.31689929200001643,
+          0.31807470899912005
+        ],
+        "prompt_injection": [
+          0.2569186670007184,
+          0.25621537499864644,
+          0.25353658300082316
+        ],
+        "statement_probability": [
+          0.19055637500059674,
+          0.18451695799922163,
+          0.18477541699940048
+        ],
+        "support_routing": [
+          0.25406349999866507,
+          0.251828917000239,
+          0.25167995799893106
+        ],
+        "urgency_score": [
+          0.19501983299960557,
+          0.1938942920005502,
+          0.19992595800067647
+        ]
+      },
+      "median_request_seconds": 0.22580295799980377,
+      "batch_encoder_seconds": [
+        2.6116368750008405,
+        2.5729668750009296,
+        2.6015865829995164
+      ],
+      "batch_text_count": 24,
+      "batch_tokens": 631,
+      "mixed_length_singleton_max_abs_difference": 0.0078125,
+      "probe_texts": [
+        "A student asks about the physical cause of ocean tides on Earth.\n\nWhat causes tides on Earth?",
+        "Critical: a production service is unavailable for all users and business activity is stopped.",
+        "hello",
+        "A longer sentence to exercise padding."
+      ],
+      "probe_cosine_min_vs_serial_mlx": 0.9999596136810732,
+      "probe_vector_norm_min": 0.996760054990838,
+      "probe_vector_norm_max": 1.0041156911068785,
+      "median_batch_seconds": 2.6015865829995164
+    },
+    "metal": {
+      "backend": "vllm-metal",
+      "versions": {
+        "mlx": "0.32.1",
+        "mlx-lm": "0.32.0",
+        "vllm-metal": "0.30.0",
+        "vllm": "0.30.0+cpu",
+        "torch": "2.13.0",
+        "transformers": "5.18.0"
+      },
+      "load_seconds": 43.77584820800075,
+      "max_rss_bytes": 24669765632,
+      "mlx_peak_bytes": 23506779748,
+      "results": {
+        "answer_ranking": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "ranked": [
+              {
+                "rank": 1,
+                "candidate": "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+                "prob": 0.9999836907835978
+              },
+              {
+                "rank": 2,
+                "candidate": "The Earth's round shape alone, without any external gravitational influence.",
+                "prob": 1.630906446276635e-05
+              },
+              {
+                "rank": 3,
+                "candidate": "Photosynthesis in marine plants.",
+                "prob": 1.5193941290900593e-10
+              }
+            ]
+          },
+          "first_request_seconds": 0.7520021660002385
+        },
+        "email_classification": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "message_class": {
+                "type": "choice",
+                "choice": "spam",
+                "confidence": 0.6743592790729676,
+                "probabilities": {
+                  "spam": 0.782906186048645,
+                  "phishing": 0.14427580616823005,
+                  "benign": 0.07281800778312489
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 155,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3514820000000327
+        },
+        "prompt_injection": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "input_class": {
+                "type": "choice",
+                "choice": "benign",
+                "confidence": 0.9802935801759249,
+                "probabilities": {
+                  "malicious": 0.00985320991203757,
+                  "benign": 0.9901467900879625
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 140,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.2577153330003057
+        },
+        "statement_probability": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "follow_up_needed": {
+                "type": "noul",
+                "noul": 0.9894066259374591
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 68,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.18133020800087252
+        },
+        "support_routing": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "escalation_path": {
+                "type": "choice",
+                "choice": "security",
+                "confidence": 0.9104566616803074,
+                "probabilities": {
+                  "billing": 0.00218598990071531,
+                  "technical": 0.024454356463725832,
+                  "account_access": 0.0405171573753283,
+                  "security": 0.9328424962602305
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 105,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.20152716700067685
+        },
+        "urgency_score": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "urgency": {
+                "type": "score",
+                "score": 2.368735294767838,
+                "confidence": 0.3531404010142264,
+                "legend": {
+                  "0": "Low: a cosmetic issue or general question with no interruption to business.",
+                  "1": "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+                  "2": "High: a major business function is impaired for some users with no practical workaround.",
+                  "3": "Critical: a production service is unavailable for all users and business activity is stopped."
+                },
+                "probabilities": {
+                  "0": 0.07296757164950114,
+                  "1": 0.00018486269382925937,
+                  "2": 0.41199226489599977,
+                  "3": 0.5148553007606698
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 107,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.2012190000004921
+        }
+      },
+      "request_seconds": {
+        "answer_ranking": [
+          0.1781117919999815,
+          0.1796482500012644,
+          0.17809275000035996
+        ],
+        "email_classification": [
+          0.3160984579990327,
+          0.31661541600078635,
+          0.31942870800048695
+        ],
+        "prompt_injection": [
+          0.26065029200071876,
+          0.25895895900066535,
+          0.2604422919994249
+        ],
+        "statement_probability": [
+          0.18092733299999963,
+          0.18142654199982644,
+          0.18448920899936638
+        ],
+        "support_routing": [
+          0.19942475000061677,
+          0.20109337500070978,
+          0.20099595800093084
+        ],
+        "urgency_score": [
+          0.20058891700136883,
+          0.20069441700070456,
+          0.20128341599956912
+        ]
+      },
+      "median_request_seconds": 0.2008451875008177,
+      "batch_encoder_seconds": [
+        0.8144542919999367,
+        0.8242336250004882,
+        0.8182128339994961
+      ],
+      "batch_text_count": 24,
+      "batch_tokens": 631,
+      "mixed_length_singleton_max_abs_difference": 0.003427565097808838,
+      "probe_texts": [
+        "A student asks about the physical cause of ocean tides on Earth.\n\nWhat causes tides on Earth?",
+        "Critical: a production service is unavailable for all users and business activity is stopped.",
+        "hello",
+        "A longer sentence to exercise padding."
+      ],
+      "probe_cosine_min_vs_serial_mlx": 0.9999528412195517,
+      "probe_vector_norm_min": 0.9999999474976372,
+      "probe_vector_norm_max": 0.999999996074101,
+      "median_batch_seconds": 0.8182128339994961
+    },
+    "metal-tuned": {
+      "backend": "vllm-metal",
+      "versions": {
+        "mlx": "0.32.1",
+        "mlx-lm": "0.32.0",
+        "vllm-metal": "0.30.0",
+        "vllm": "0.30.0+cpu",
+        "torch": "2.13.0",
+        "transformers": "5.18.0"
+      },
+      "load_seconds": 20.12452787500115,
+      "gpu_memory_utilization": 0.5,
+      "max_rss_bytes": 20584431616,
+      "mlx_peak_bytes": 19486539364,
+      "results": {
+        "answer_ranking": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "ranked": [
+              {
+                "rank": 1,
+                "candidate": "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+                "prob": 0.9999836907835978
+              },
+              {
+                "rank": 2,
+                "candidate": "The Earth's round shape alone, without any external gravitational influence.",
+                "prob": 1.630906446276635e-05
+              },
+              {
+                "rank": 3,
+                "candidate": "Photosynthesis in marine plants.",
+                "prob": 1.5193941290900593e-10
+              }
+            ]
+          },
+          "first_request_seconds": 0.6003965410000092
+        },
+        "email_classification": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "message_class": {
+                "type": "choice",
+                "choice": "spam",
+                "confidence": 0.6743592790729676,
+                "probabilities": {
+                  "spam": 0.782906186048645,
+                  "phishing": 0.14427580616823005,
+                  "benign": 0.07281800778312489
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 155,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.3407574160009972
+        },
+        "prompt_injection": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "input_class": {
+                "type": "choice",
+                "choice": "benign",
+                "confidence": 0.9802935801759249,
+                "probabilities": {
+                  "malicious": 0.00985320991203757,
+                  "benign": 0.9901467900879625
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 140,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.2525551250000717
+        },
+        "statement_probability": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "follow_up_needed": {
+                "type": "noul",
+                "noul": 0.9894066259374591
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 68,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.17076012500001525
+        },
+        "support_routing": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "escalation_path": {
+                "type": "choice",
+                "choice": "security",
+                "confidence": 0.9104566616803074,
+                "probabilities": {
+                  "billing": 0.00218598990071531,
+                  "technical": 0.024454356463725832,
+                  "account_access": 0.0405171573753283,
+                  "security": 0.9328424962602305
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 105,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.19206387499980337
+        },
+        "urgency_score": {
+          "response": {
+            "model": "Contrastive-LM/CLM-v0.1-8B",
+            "answers": {
+              "urgency": {
+                "type": "score",
+                "score": 2.368735294767838,
+                "confidence": 0.3531404010142264,
+                "legend": {
+                  "0": "Low: a cosmetic issue or general question with no interruption to business.",
+                  "1": "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+                  "2": "High: a major business function is impaired for some users with no practical workaround.",
+                  "3": "Critical: a production service is unavailable for all users and business activity is stopped."
+                },
+                "probabilities": {
+                  "0": 0.07296757164950114,
+                  "1": 0.00018486269382925937,
+                  "2": 0.41199226489599977,
+                  "3": 0.5148553007606698
+                }
+              }
+            },
+            "usage": {
+              "billing_units": 1,
+              "input_tokens": 107,
+              "output_tokens": 0
+            }
+          },
+          "first_request_seconds": 0.1925948750013049
+        }
+      },
+      "request_seconds": {
+        "answer_ranking": [
+          0.1695322079995094,
+          0.1679060410006059,
+          0.1688979169994127,
+          0.16869695899913495,
+          0.16969400000016321,
+          0.16852587500034133,
+          0.16934791700077767
+        ],
+        "email_classification": [
+          0.30891533400063054,
+          0.3096278339999117,
+          0.30820741599927715,
+          0.30904029199882643,
+          0.30941224999878614,
+          0.30979712499902234,
+          0.30942487500033167
+        ],
+        "prompt_injection": [
+          0.25192820800111804,
+          0.2512267080001038,
+          0.24988604200007103,
+          0.25063645800037193,
+          0.24955612499979907,
+          0.2503284590002295,
+          0.2512738330005959
+        ],
+        "statement_probability": [
+          0.16934887500065088,
+          0.16903891699985252,
+          0.16936925000118208,
+          0.16881583400027012,
+          0.16901304100065317,
+          0.17044158300086565,
+          0.16947429199899489
+        ],
+        "support_routing": [
+          0.19150900000022375,
+          0.19263374999900407,
+          0.19133125000007567,
+          0.1919160829984321,
+          0.19155483299982734,
+          0.19134845799999312,
+          0.19212537500061444
+        ],
+        "urgency_score": [
+          0.19168079199880594,
+          0.19167670800015912,
+          0.19247387499854085,
+          0.19261329199980537,
+          0.19227479099936318,
+          0.19168904200159886,
+          0.19230358400091063
+        ]
+      },
+      "median_request_seconds": 0.19180256250001548,
+      "batch_encoder_seconds": [
+        0.8131429170007323,
+        0.8166214579996449,
+        0.8126605420002306,
+        0.8145584169997164,
+        0.8073890839987143,
+        0.812251458000901,
+        0.8094446249997418
+      ],
+      "batch_text_count": 24,
+      "batch_tokens": 631,
+      "mixed_length_singleton_max_abs_difference": 0.003427565097808838,
+      "probe_texts": [
+        "A student asks about the physical cause of ocean tides on Earth.\n\nWhat causes tides on Earth?",
+        "Critical: a production service is unavailable for all users and business activity is stopped.",
+        "hello",
+        "A longer sentence to exercise padding."
+      ],
+      "probe_cosine_min_vs_serial_mlx": 0.9999528412195517,
+      "probe_vector_norm_min": 0.9999999474976372,
+      "probe_vector_norm_max": 0.999999996074101,
+      "median_batch_seconds": 0.8126605420002306
+    }
+  },
+  "reproduction_check": {
+    "date": "2026-10-01",
+    "backend": "mlx-lm",
+    "all_six_responses_match_original_baseline": true,
+    "median_request_seconds": 0.3295384169978206,
+    "framework_script_sha256": "006f7fce24499a43b78c05d5822727aeb49e2617b26069b7620f69b4ac6455d3"
+  }
+}

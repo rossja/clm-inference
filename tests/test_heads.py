@@ -1,11 +1,10 @@
 """Compare MLX projection heads with an independent NumPy implementation."""
 
-import json
 import math
 
-import mlx.core as mx
 import numpy as np
 import pytest
+import torch
 
 from clm_inference.heads import HeadPair
 
@@ -41,6 +40,7 @@ def test_heads_match_reference_and_scale_clamp(tmp_path, residual):
     config = {
         "hidden_size": 4, "width": 3, "projection_dim": 2, "depth": 3,
         "activation": "gelu", "layernorm": True, "residual": residual,
+        "model": "test-encoder",
     }
     shapes = {
         "inp.weight": (3, 4), "inp.bias": (3,),
@@ -54,15 +54,20 @@ def test_heads_match_reference_and_scale_clamp(tmp_path, residual):
         for name, shape in shapes.items()
     }
     weights["logit_scale"] = np.array(math.log(101), dtype=np.float32)
-    config_path = tmp_path / "config.json"
-    config_path.write_text(json.dumps({
-        "state_head": config, "action_head": config, "logit_scale": 0,
-    }), encoding="utf-8")
-    weights_path = tmp_path / "heads.safetensors"
-    mx.save_safetensors(str(weights_path), {
-        key: mx.array(value) for key, value in weights.items()
-    })
-    pair = HeadPair(config_path, weights_path)
+    checkpoint = {
+        prefix: {
+            name: torch.from_numpy(weights[f"{prefix}.{name}"])
+            for name in shapes
+        }
+        for prefix in ("state_head", "action_head")
+    }
+    checkpoint.update(cfg=config, logit_scale=torch.from_numpy(
+        weights["logit_scale"]
+    ))
+    weights_path = tmp_path / "heads.pt"
+    torch.save(checkpoint, weights_path)
+    pair = HeadPair(weights_path)
+    assert pair.encoder_model == "test-encoder"
     assert pair.scale == 100
     states = rng.standard_normal((2, 4)).astype(np.float32)
     actions = rng.standard_normal((3, 4)).astype(np.float32)
@@ -72,9 +77,7 @@ def test_heads_match_reference_and_scale_clamp(tmp_path, residual):
     )
     actual = pair.logits(states.tolist(), actions.tolist())
     np.testing.assert_allclose(actual, expected, rtol=1e-5, atol=1e-4)
-    weights.pop("state_head.inp.bias")
-    mx.save_safetensors(str(weights_path), {
-        key: mx.array(value) for key, value in weights.items()
-    })
+    checkpoint["state_head"].pop("inp.bias")
+    torch.save(checkpoint, weights_path)
     with pytest.raises(ValueError):
-        HeadPair(config_path, weights_path)
+        HeadPair(weights_path)

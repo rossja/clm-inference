@@ -24,19 +24,22 @@ class Settings(BaseModel):
     """Server settings supplied by a YAML configuration file."""
 
     model: str = Field(min_length=1)
-    heads_config: str = Field(min_length=1)
+    encoder_model: str = Field(min_length=1)
     heads_weights: str = Field(min_length=1)
     host: str = Field(min_length=1)
     port: int = Field(ge=1, le=65535)
     max_tokens: int = Field(ge=1, le=2048)
     max_batch_size: int = Field(ge=1)
+    gpu_memory_utilization: float = Field(gt=0, le=1)
 
 
 class EmbeddingRequest(BaseModel):
     """Text inputs and the OpenAI options supported by this encoder."""
 
     input: str | list[str]
-    model: str | None = None
+    model: str | None = Field(
+        default=None, description="Optional encoder model ID."
+    )
     encoding_format: Literal["float", "base64"] = "float"
     truncate_prompt_tokens: int | None = Field(default=None, ge=1)
 
@@ -70,21 +73,27 @@ def load_engine(settings: Settings):
     # Read .env before Hub caches its environment settings; import MLX here
     # so OpenAPI generation does not need Metal.
     from huggingface_hub import snapshot_download  # pylint: disable=import-outside-toplevel
+    from huggingface_hub import hf_hub_download  # pylint: disable=import-outside-toplevel
     from clm_inference.encoder import Encoder  # pylint: disable=import-outside-toplevel
     from clm_inference.engine import Engine  # pylint: disable=import-outside-toplevel
     from clm_inference.heads import HeadPair  # pylint: disable=import-outside-toplevel
 
+    heads = HeadPair(Path(hf_hub_download(
+        settings.model, settings.heads_weights
+    )))
+    if heads.encoder_model != settings.encoder_model:
+        raise ValueError("The CLM heads require a different encoder model.")
     path = snapshot_download(
-        settings.model,
+        settings.encoder_model,
         allow_patterns=[
             "*.json", "model*.safetensors", "tokenizer.model", "*.tiktoken",
-            settings.heads_config, settings.heads_weights,
         ],
     )
     path = Path(path)
     return Engine(
-        Encoder(path),
-        HeadPair(path / settings.heads_config, path / settings.heads_weights),
+        Encoder(path, settings.max_tokens, settings.max_batch_size,
+                settings.gpu_memory_utilization),
+        heads,
         settings.model, settings.max_tokens,
     )
 
@@ -100,7 +109,12 @@ def create_app(settings: Settings) -> FastAPI:
             app.state.engine = await loop.run_in_executor(
                 executor, load_engine, settings
             )
-            yield
+            try:
+                yield
+            finally:
+                await loop.run_in_executor(
+                    executor, app.state.engine.encoder.close
+                )
 
     app = FastAPI(
         title="CLM Inference", version="0.1.0", lifespan=lifespan
@@ -111,19 +125,21 @@ def create_app(settings: Settings) -> FastAPI:
         """Report readiness after the model has loaded."""
         return {"status": "ok", "model": settings.model}
 
-    def validate_model(model: str | None) -> None:
-        if model is not None and model != settings.model:
+    def validate_model(model: str | None, expected: str) -> None:
+        if model is not None and model != expected:
             raise HTTPException(400, "The requested model is not loaded.")
 
     @app.get("/v1/models")
     async def models() -> dict[str, list[dict[str, str]]]:
         """Identify the loaded encoder and trained-head model."""
-        return {"models": [{"name": settings.model}]}
+        return {"models": [
+            {"name": settings.model}, {"name": settings.encoder_model},
+        ]}
 
     @app.post("/v1/systemone")
     async def systemone(request: DecisionRequest) -> DecisionResponse:
         """Answer caller-defined choice, noul and score questions."""
-        validate_model(request.model)
+        validate_model(request.model, settings.model)
         text_count = sum(
             1 + len(candidates(question)[0])
             for question in request.questions.values()
@@ -139,7 +155,7 @@ def create_app(settings: Settings) -> FastAPI:
     @app.post("/v1/rank")
     async def rank(request: RankRequest) -> RankResponse:
         """Rank arbitrary candidate answers using the trained CLM heads."""
-        validate_model(request.model)
+        validate_model(request.model, settings.model)
         if 1 + len(request.answers) > settings.max_batch_size:
             raise HTTPException(400, "Context and answers exceed batch limit.")
         return await asyncio.get_running_loop().run_in_executor(
@@ -149,7 +165,7 @@ def create_app(settings: Settings) -> FastAPI:
     @app.post("/v1/embeddings")
     async def embed(request: EmbeddingRequest) -> EmbeddingResponse:
         """Return one normalized 4096-dimensional vector per input text."""
-        validate_model(request.model)
+        validate_model(request.model, settings.encoder_model)
         texts = (
             [request.input] if isinstance(request.input, str) else request.input
         )
@@ -178,7 +194,7 @@ def create_app(settings: Settings) -> FastAPI:
                 Embedding(index=index, embedding=vector)
                 for index, vector in enumerate(vectors)
             ],
-            model=settings.model,
+            model=settings.encoder_model,
             usage=Usage(prompt_tokens=tokens, total_tokens=tokens),
         )
 

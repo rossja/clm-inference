@@ -298,7 +298,8 @@
                 "type": "null"
               }
             ],
-            "title": "Model"
+            "title": "Model",
+            "description": "Optional CLM decision model ID."
           },
           "temperature": {
             "type": "number",
@@ -446,7 +447,8 @@
                 "type": "null"
               }
             ],
-            "title": "Model"
+            "title": "Model",
+            "description": "Optional encoder model ID."
           },
           "encoding_format": {
             "type": "string",
@@ -624,7 +626,8 @@
                 "type": "null"
               }
             ],
-            "title": "Model"
+            "title": "Model",
+            "description": "Optional CLM decision model ID."
           },
           "temperature": {
             "type": "number",

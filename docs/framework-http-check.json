@@ -1,0 +1,160 @@
+{
+  "examples": {
+    "answer_ranking": {
+      "response": {
+        "model": "Contrastive-LM/CLM-v0.1-8B",
+        "ranked": [
+          {
+            "rank": 1,
+            "candidate": "The gravitational pull of the Moon and, to a lesser extent, the Sun.",
+            "prob": 0.9999836907835978
+          },
+          {
+            "rank": 2,
+            "candidate": "The Earth's round shape alone, without any external gravitational influence.",
+            "prob": 1.630906446276635e-05
+          },
+          {
+            "rank": 3,
+            "candidate": "Photosynthesis in marine plants.",
+            "prob": 1.5193941290900593e-10
+          }
+        ]
+      },
+      "seconds": 0.39013954199981526
+    },
+    "email_classification": {
+      "response": {
+        "model": "Contrastive-LM/CLM-v0.1-8B",
+        "answers": {
+          "message_class": {
+            "type": "choice",
+            "choice": "spam",
+            "confidence": 0.6743592790729676,
+            "probabilities": {
+              "spam": 0.782906186048645,
+              "phishing": 0.14427580616823005,
+              "benign": 0.07281800778312489
+            }
+          }
+        },
+        "usage": {
+          "billing_units": 1,
+          "input_tokens": 155,
+          "output_tokens": 0
+        }
+      },
+      "seconds": 0.3440541670024686
+    },
+    "prompt_injection": {
+      "response": {
+        "model": "Contrastive-LM/CLM-v0.1-8B",
+        "answers": {
+          "input_class": {
+            "type": "choice",
+            "choice": "benign",
+            "confidence": 0.9802935801759249,
+            "probabilities": {
+              "malicious": 0.00985320991203757,
+              "benign": 0.9901467900879625
+            }
+          }
+        },
+        "usage": {
+          "billing_units": 1,
+          "input_tokens": 140,
+          "output_tokens": 0
+        }
+      },
+      "seconds": 0.28035458299927996
+    },
+    "statement_probability": {
+      "response": {
+        "model": "Contrastive-LM/CLM-v0.1-8B",
+        "answers": {
+          "follow_up_needed": {
+            "type": "noul",
+            "noul": 0.9894066259374591
+          }
+        },
+        "usage": {
+          "billing_units": 1,
+          "input_tokens": 68,
+          "output_tokens": 0
+        }
+      },
+      "seconds": 0.1901674170003389
+    },
+    "support_routing": {
+      "response": {
+        "model": "Contrastive-LM/CLM-v0.1-8B",
+        "answers": {
+          "escalation_path": {
+            "type": "choice",
+            "choice": "security",
+            "confidence": 0.9104566616803074,
+            "probabilities": {
+              "billing": 0.00218598990071531,
+              "technical": 0.024454356463725832,
+              "account_access": 0.0405171573753283,
+              "security": 0.9328424962602305
+            }
+          }
+        },
+        "usage": {
+          "billing_units": 1,
+          "input_tokens": 105,
+          "output_tokens": 0
+        }
+      },
+      "seconds": 0.21378987499701907
+    },
+    "urgency_score": {
+      "response": {
+        "model": "Contrastive-LM/CLM-v0.1-8B",
+        "answers": {
+          "urgency": {
+            "type": "score",
+            "score": 2.368735294767838,
+            "confidence": 0.3531404010142264,
+            "legend": {
+              "0": "Low: a cosmetic issue or general question with no interruption to business.",
+              "1": "Moderate: a limited feature is impaired, but a reasonable workaround exists.",
+              "2": "High: a major business function is impaired for some users with no practical workaround.",
+              "3": "Critical: a production service is unavailable for all users and business activity is stopped."
+            },
+            "probabilities": {
+              "0": 0.07296757164950114,
+              "1": 0.00018486269382925937,
+              "2": 0.41199226489599977,
+              "3": 0.5148553007606698
+            }
+          }
+        },
+        "usage": {
+          "billing_units": 1,
+          "input_tokens": 107,
+          "output_tokens": 0
+        }
+      },
+      "seconds": 0.21426895900003728
+    }
+  },
+  "checks": {
+    "finite_normalized_4096_dimensions": true,
+    "empty_and_unicode": true,
+    "base64_float32_equivalence": true,
+    "one_token_truncation": true,
+    "2048_token_limit": true,
+    "32_text_batch": true,
+    "eight_concurrent_consistent_requests": true,
+    "eight_concurrent_seconds": 2.228719957998692
+  },
+  "lifecycle": {
+    "verification_date": "2026-10-01",
+    "initial_shutdown": "SIGSEGV in torch.accelerator.empty_host_cache (exit 139)",
+    "minimal_torch_reproduction_exit_code": 139,
+    "workaround": "Scoped replacement with torch.mps.empty_cache during engine shutdown; original function restored afterward",
+    "final_server_shutdown": "Metal worker shutdown complete; application shutdown complete; server process finished without segmentation fault"
+  }
+}
