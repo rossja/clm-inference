@@ -53,5 +53,5 @@ CLM's projection heads to rank candidates. A CLM decision service can use
 
 ```sh
 uv run pytest
-uv run pylint --rcfile="$HOME/src/dotfiles/private/agents/rules/lib/pylintrc" src/clm_inference
+uv run pylint --rcfile=.pylintrc src/clm_inference
 ```
