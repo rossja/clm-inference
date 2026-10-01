@@ -203,6 +203,11 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# Local configuration and credentials
+.env*
+config/*
+!config/default.yaml
+
 # Ruff stuff:
 .ruff_cache/
 

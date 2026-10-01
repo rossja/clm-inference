@@ -1,0 +1,5 @@
+model: czl/CLM-v0.1-8B-MLX-8bit
+host: 127.0.0.1
+port: 8092
+max_tokens: 2048
+max_batch_size: 32

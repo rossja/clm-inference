@@ -1,0 +1,27 @@
+[project]
+name = "clm-inference"
+version = "0.1.0"
+description = "An MLX embedding server for contrastive language models on Apple Silicon."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "huggingface-hub>=0.34,<2",
+    "mlx-lm==0.31.3",
+    "python-dotenv>=1,<2",
+    "pyyaml>=6,<7",
+    "uvicorn>=0.34,<1",
+]
+
+[project.scripts]
+clm-inference = "clm_inference.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["httpx>=0.28,<1", "pylint>=3,<5", "pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
